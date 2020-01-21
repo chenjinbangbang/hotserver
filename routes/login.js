@@ -9,6 +9,7 @@ const wx = require('../utils/wxconfig.json'); // 微信小程序设置，appid�
 const db = require('../modules/mysql'); // mysql
 const createToken = require("../token/createToken"); // 创建token
 const checkToken = require('../token/checkToken'); // 检查token
+const isCheck = false // 是否校验token
 
 const { checkParams } = require('../modules/global'); // 公共方法
 
@@ -23,6 +24,10 @@ router.use(async (req, res, next) => {
   // console.log(req.hostname);
   // console.log(req.route);
   let token = req.headers.authorization;
+
+  if(!isCheck) {
+    next();
+  }
 
   if (whileArr.includes(req.path)) {
     next();

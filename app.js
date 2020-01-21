@@ -4,8 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var loginRouter = require('./routes/login');
-var usersRouter = require('./routes/users');
+var indexRouter = require('./routes/index');
+var userRouter = require('./routes/user');
+var publicRouter = require('./routes/public');
 
 var app = express();
 
@@ -19,8 +20,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', loginRouter);
-app.use('/users', usersRouter);
+app.use('/', indexRouter); // 路由中间件
+app.use('/api/user', userRouter); // 用户接口
+app.use('/api/public', publicRouter); // 公共接口
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
