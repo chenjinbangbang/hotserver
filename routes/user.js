@@ -46,20 +46,47 @@ router.post('/register', async (req, res) => {
   password = md5(password + '_hot')
   password_security = md5(password_security + '_hot')
 
-  let sql = `select * from user where username = '${username}' and password = '${password}'`;
-  let user = await db(sql);
+  // 验证用户名是否存在
+  let usernameSql = `select * from user where username = '${username}'`;
+  let usernameData = await db(usernameSql);
 
-  if (user.length > 0) {
-    let { token, expires } = createToken({ username: user[0].username, password: user[0].password }); // 返回token
-
-    // 把token存入数据库
-    let tokenSql = `update user set token = '${token}', last_login_time = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
-    await db(tokenSql);
-
-    res.json({ success: true, msg: "登录成功", data: { access_token: token, expires } })
-  } else {
-    res.json({ success: false, msg: "账号或密码错误，请重新输入", data: null })
+  if(usernameData.length > 0) {
+    res.json({ success: false, msg: '此用户名已存在', data: null })
+    return
   }
+
+  // 验证邮箱是否存在
+  let emailSql = `select * from user where email = '${email}'`;
+  let emailData = await db(emailSql);
+
+  if(emailData.length > 0) {
+    res.json({ success: false, msg: '此邮箱已存在', data: null })
+    return
+  }
+
+  // 验证QQ是否存在
+  let qqSql = `select * from user where qq = '${qq}'`;
+  let qqData = await db(qqSql);
+
+  if(qqData.length > 0) {
+    res.json({ success: false, msg: '此QQ已存在', data: null })
+    return
+  }
+
+  // let sql = `select * from user where username = '${username}' and password = '${password}'`;
+  // let user = await db(sql);
+
+  // if (user.length > 0) {
+  //   let { token, expires } = createToken({ username: user[0].username, password: user[0].password }); // 返回token
+
+  //   // 把token存入数据库
+  //   let tokenSql = `update user set token = '${token}', last_login_time = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
+  //   await db(tokenSql);
+
+  //   res.json({ success: true, msg: "登录成功", data: { access_token: token, expires } })
+  // } else {
+  //   res.json({ success: false, msg: "账号或密码错误，请重新输入", data: null })
+  // }
 });
 
 
@@ -74,14 +101,15 @@ router.get('/check/username', async (req,res) => {
   const { username } = req.query
 
   let sql = `select * from user where username = '${username}'`;
-  let user = await db(sql);
+  let data = await db(sql);
 
-  if(user.length > 0) {
+  if(data.length > 0) {
     res.json({ success: false, msg: '此用户名已存在', data: null })
   } else {
     res.json({ success: true, msg: '此用户名可使用', data: null })
   }
 });
+
 
 /**
  * 验证邮箱是否存在
@@ -94,14 +122,15 @@ router.get('/check/email', async (req,res) => {
   const { email } = req.query
 
   let sql = `select * from user where email = '${email}'`;
-  let user = await db(sql);
+  let data = await db(sql);
 
-  if(user.length > 0) {
+  if(data.length > 0) {
     res.json({ success: false, msg: '此邮箱已存在', data: null })
   } else {
     res.json({ success: true, msg: '此邮箱可使用', data: null })
   }
 });
+
 
 /**
  * 验证QQ是否存在
@@ -114,9 +143,9 @@ router.get('/check/qq', async (req,res) => {
   const { qq } = req.query
 
   let sql = `select * from user where qq = '${qq}'`;
-  let user = await db(sql);
+  let data = await db(sql);
 
-  if(user.length > 0) {
+  if(data.length > 0) {
     res.json({ success: false, msg: '此QQ已存在', data: null })
   } else {
     res.json({ success: true, msg: '此QQ可使用', data: null })
