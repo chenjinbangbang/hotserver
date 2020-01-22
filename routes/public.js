@@ -10,6 +10,35 @@ const validationResult = require('express-validator/check').validationResult;
 const db = require('../modules/mysql'); // mysql
 const { checkParams } = require('../modules/global'); // 公共方法
 
+// var iconv = require('iconv-lite');
+// var fs = require('fs');
+// var fileStr = fs.readFileSync('input.txt', {encoding:'binary'});
+// var buf = new Buffer(fileStr, 'binary');
+// var str = iconv.decode(buf,'utf8');
+// console.log(str);
+
+// 上传图片
+const multer = require('multer');
+// const iconv = require('iconv-lite'); // 解决上传文件名中文乱码问题（暂时无法解决）
+// const fs = require('fs')
+const imgSrc = 'uploads_backup'; // 文件路径，在public文件夹下
+// const upload = multer({dest: 'public/uploads'})
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, `public/${imgSrc}`);
+  },
+  filename(req, file, cb) {
+    console.log(file);
+
+    // let fileStr = fs.readFileSync(`public/${imgSrc}`, { encoding: 'binary' });
+    // let buf = new Buffer(fileStr, 'binary');
+    // let str = iconv.decode(buf, 'utf8');
+    // console.log(str);
+
+    cb(null, `${Date.now()}_${file.originalname}`);
+  }
+});
+const upload = multer({ storage })
 
 
 /**
@@ -36,6 +65,7 @@ router.get('/dict', async (req, res, next) => {
   }
 });
 
+
 /**
  * 获取省市区
  */
@@ -51,20 +81,6 @@ router.get('/area', async (req, res, next) => {
   let cityData = await db(citySql);
   let areaSql = `select * from area where level = '3'`;
   let areaData = await db(areaSql);
-
-  // 添加区域
-  // cityData.forEach(item1 => {
-  //   item1.children = []
-  //   areaData.forEach(item2 => {
-  //     if(item1.id === item2.pid) {
-  //       item1.children.push({
-  //         areaId: item2.id,
-  //         areaName: item2.name,
-  //         children: []
-  //       })
-  //     }
-  //   })
-  // })
 
   // 处理省市区数据
   provinceData.forEach(item => {
@@ -119,6 +135,31 @@ router.get('/area', async (req, res, next) => {
   //   ...
   // ]
   
+});
+
+
+/**
+ * 上传文件
+ * file：file文件
+ */
+router.post('/upload', upload.single('file'), async (req, res) => {
+  const token = req.headers.authorization;
+
+  // console.log(token);
+  // console.log(req.file);
+  const host = `${req.protocol}://${req.headers.host}`;
+  const file = `${host}/${imgSrc}/${req.file.filename}`
+
+  res.json({ success: true, msg: "", data: file })
+
+  // let sql = `update users set headimg = '${file}'`;
+  // let user = await db(sql)
+
+  // if (user.affectedRows > 0) {
+  //   res.json({ success: true, msg: "", data: { headimg } })
+  // } else {
+  //   res.json({ success: false, msg: "上传文件失败", data: null })
+  // }
 });
 
 module.exports = router;
