@@ -3,55 +3,12 @@ const router = express.Router();
 const md5 = require('js-md5');
 const dateFormat = require('dateformat');
 
-const request = require('request'); // 处理node request请求
-const wx = require('../utils/wxconfig.json'); // 微信小程序设置，appid和secret
+// const request = require('request'); // 处理node request请求
+// const wx = require('../utils/wxconfig.json'); // 微信小程序设置，appid和secret
 
-const db = require('../modules/mysql'); // mysql
-const createToken = require("../token/createToken"); // 创建token
-const checkToken = require('../token/checkToken'); // 检查token
-const isCheck = false // 是否校验token
+const db = require('../modules/mysql');
 
 const { checkParams } = require('../modules/global'); // 公共方法
-
-const whileArr = ['/check/username', '/login', '/register']; // 免检查token白名单
-
-// 路由中间件，验证token是否过期
-router.use(async (req, res, next) => {
-  // console.log(req.headers);
-  // console.log(req.headers.host);
-  // console.log(req.protocol);
-  // console.log(req.baseUrl);
-  // console.log(req.hostname);
-  // console.log(req.route);
-  let token = req.headers.authorization;
-
-  if(!isCheck) {
-    next();
-  }
-
-  if (whileArr.includes(req.path)) {
-    next();
-  } else {
-    try {
-      let result = await checkToken(token);
-      // console.log('验证：', result);
-      // console.log(Boolean(result))
-
-      let sql = `select id from user where token = '${token}'`;
-      let user = await db(sql);
-      // console.log(user);
-
-      if (user.length > 0) {
-        next();
-      } else {
-        res.json({ success: false, msg: "你的账号在另一个地方登录，请重新登录或修改密码", data: null })
-      }
-    } catch (err) {
-      // console.log('验证：', err)
-      res.json({ success: false, msg: '登录信息已过期，请重新登录', data: null })
-    }
-  }
-});
 
 // 检查用户名是否存在
 router.get('/check/username', async (req, res, next) => {

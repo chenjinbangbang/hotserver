@@ -4,8 +4,8 @@
 const express = require('express');
 const router = express.Router();
 // const dateFormat = require('dateformat');
-const check = require('express-validator/check').check;
-const validationResult = require('express-validator/check').validationResult;
+// const check = require('express-validator/check').check;
+// const validationResult = require('express-validator/check').validationResult;
 
 const db = require('../modules/mysql'); // mysql
 const { checkParams } = require('../modules/global'); // 公共方法
@@ -43,7 +43,7 @@ const upload = multer({ storage })
 
 /**
  * 获取字典表
- * dict_code：字典码（wealth_dict：财务类型字典表，bank_dict：银行卡字典表，share_dict_toutiao：今日头条分享字典表，share_dict_douyin：抖音短视频分享字典表，share_dict_huoshan：火山小视频分享字典表，share_dict_kuaishou：快手分享字典表）。
+ * dict_code 字典码（wealth_dict：财务类型字典表，bank_dict：银行卡字典表，share_dict_toutiao：今日头条分享字典表，share_dict_douyin：抖音短视频分享字典表，share_dict_huoshan：火山小视频分享字典表，share_dict_kuaishou：快手分享字典表）。
  */
 router.get('/dict', async (req, res, next) => {
   console.log(req.query)

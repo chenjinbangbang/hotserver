@@ -3,17 +3,14 @@ const router = express.Router();
 const md5 = require('js-md5');
 const dateFormat = require('dateformat');
 
-const request = require('request'); // 处理node request请求
-const wx = require('../utils/wxconfig.json'); // 微信小程序设置，appid和secret
-
 const db = require('../modules/mysql'); // mysql
 const createToken = require("../token/createToken"); // 创建token
 const checkToken = require('../token/checkToken'); // 检查token
-const isCheck = false // 是否校验token
+const isCheck = true // 是否校验token
 
 // const { checkParams } = require('../modules/global'); // 公共方法
 
-const whileArr = ['/login', '/register', '/wxlogin', '/qqlogin']; // 免检查token白名单
+const whileArr = ['/api/user/login', '/api/user/register', '/api/user/check/username', '/api/user/check/email', '/api/user/check/qq']; // 免检查token白名单
 
 // 路由中间件，验证token是否过期
 router.use(async (req, res, next) => {
@@ -38,14 +35,14 @@ router.use(async (req, res, next) => {
       // console.log('验证：', result);
       // console.log(Boolean(result))
 
-      let sql = `select id from users where token = '${token}'`;
-      let users = await db(sql);
-      // console.log(users);
+      let sql = `select id from user where token = '${token}'`;
+      let data = await db(sql);
+      // console.log(data);
 
-      if (users.length > 0) {
+      if (data.length > 0) {
         next();
       } else {
-        res.json({ success: false, msg: "你的账号在另一个地方登录，请重新登录或修改密码", data: null })
+        res.json({ success: false, msg: "你的账号在另一个地方登录，请重新登录", data: null })
       }
     } catch (err) {
       // console.log('验证：', err)

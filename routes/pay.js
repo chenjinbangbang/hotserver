@@ -76,7 +76,7 @@ router.post('/status', async (req, res, next) => {
     2: '充值成功'
   }
 
-  // 校验status
+  // status校验
   let keys = Object.keys(statusArr); // 索引是string类型
   if(!keys.includes(status)){
     res.json({ success: false, msg: 'status传参有误', data: null })
