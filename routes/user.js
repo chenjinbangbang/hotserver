@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const md5 = require('js-md5');
+const dateformat = require('dateformat');
 
+const createToken = require("../token/createToken"); // 创建token
 const {
   checkParams
 } = require('../modules/global'); // 公共方法
@@ -47,40 +50,59 @@ router.post('/register', async (req, res) => {
   password_security = md5(password_security + '_hot')
 
   // 验证用户名是否存在
-  let usernameSql = `select * from user where username = '${username}'`;
-  let usernameData = await db(usernameSql);
+  // let usernameSql = `select * from user where username = '${username}'`;
+  // let usernameData = await db(usernameSql);
 
-  if(usernameData.length > 0) {
-    res.json({ success: false, msg: '此用户名已存在', data: null })
-    return
+  // if(usernameData.length > 0) {
+  //   res.json({ success: false, msg: '此用户名已存在', data: null })
+  //   return
+  // }
+
+  // // 验证邮箱是否存在
+  // let emailSql = `select * from user where email = '${email}'`;
+  // let emailData = await db(emailSql);
+
+  // if(emailData.length > 0) {
+  //   res.json({ success: false, msg: '此邮箱已存在', data: null })
+  //   return
+  // }
+
+  // // 验证QQ是否存在
+  // let qqSql = `select * from user where qq = '${qq}'`;
+  // let qqData = await db(qqSql);
+
+  // if(qqData.length > 0) {
+  //   res.json({ success: false, msg: '此QQ已存在', data: null })
+  //   return
+  // }
+
+  let sql = `insert into user set role = ${role}, referrer_user_id = ${referrer_user_id || 0}, username = '${username}', password = '${password}', email = '${email}', qq = '${qq}', mobile = '${mobile}', password_security = '${password_security}'`
+  let data = await db(sql);
+  console.log(data)
+
+  if(data.affectedRows > 0) {
+
+    // 注册成功后，自动登录，并且更新token
+    let { token, expires } = createToken({ id: data.insertId, username, password }); // 返回token
+    console.log(token)
+    console.log(expires)
+
+    // 把token存入数据库
+    let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where id = '${data.insertId}'`;
+    await db(tokenSql);
+
+    res.json({ success: true, msg: "注册用户成功", data: { access_token: token, expires } })
+
+    // res.json({ success: true, msg: "注册用户成功", data: null })
+  } else {
+    res.json({ success: false, msg: '注册用户失败', data: null })
   }
-
-  // 验证邮箱是否存在
-  let emailSql = `select * from user where email = '${email}'`;
-  let emailData = await db(emailSql);
-
-  if(emailData.length > 0) {
-    res.json({ success: false, msg: '此邮箱已存在', data: null })
-    return
-  }
-
-  // 验证QQ是否存在
-  let qqSql = `select * from user where qq = '${qq}'`;
-  let qqData = await db(qqSql);
-
-  if(qqData.length > 0) {
-    res.json({ success: false, msg: '此QQ已存在', data: null })
-    return
-  }
-
-  // let sql = `select * from user where username = '${username}' and password = '${password}'`;
-  // let user = await db(sql);
 
   // if (user.length > 0) {
   //   let { token, expires } = createToken({ username: user[0].username, password: user[0].password }); // 返回token
 
   //   // 把token存入数据库
-  //   let tokenSql = `update user set token = '${token}', last_login_time = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
+  //   let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
   //   await db(tokenSql);
 
   //   res.json({ success: true, msg: "登录成功", data: { access_token: token, expires } })

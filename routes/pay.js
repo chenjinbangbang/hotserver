@@ -3,7 +3,7 @@
  */
 const express = require('express');
 const router = express.Router();
-// const dateFormat = require('dateformat');
+// const dateformat = require('dateformat');
 // const check = require('express-validator/check').check;
 // const validationResult = require('express-validator/check').validationResult;
 

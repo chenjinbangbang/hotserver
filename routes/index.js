@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const md5 = require('js-md5');
-const dateFormat = require('dateformat');
+const dateformat = require('dateformat');
 
 const db = require('../modules/mysql'); // mysql
-const createToken = require("../token/createToken"); // 创建token
+// const createToken = require("../token/createToken"); // 创建token
 const checkToken = require('../token/checkToken'); // 检查token
 const isCheck = true // 是否校验token
 
@@ -32,12 +32,12 @@ router.use(async (req, res, next) => {
   } else {
     try {
       let result = await checkToken(token);
-      // console.log('验证：', result);
-      // console.log(Boolean(result))
+      console.log('验证：', result);
+      console.log(token)
 
       let sql = `select id from user where token = '${token}'`;
       let data = await db(sql);
-      // console.log(data);
+      console.log(data);
 
       if (data.length > 0) {
         next();

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const md5 = require('js-md5');
-const dateFormat = require('dateformat');
+const dateformat = require('dateformat');
 
 // const request = require('request'); // 处理node request请求
 // const wx = require('../utils/wxconfig.json'); // 微信小程序设置，appid和secret
@@ -61,7 +61,7 @@ router.post('/login', async (req, res, next) => {
     let { token, expires } = createToken({ username: user[0].username, password: user[0].password }); // 返回token
 
     // 把token存入数据库
-    let tokenSql = `update user set token = '${token}', last_login_time = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
+    let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
     await db(tokenSql);
 
     res.json({ success: true, msg: "登录成功", data: { access_token: token, expires } })
@@ -114,7 +114,7 @@ router.post('/register', async (req, res, next) => {
     let { token, expires } = createToken({ username, password }); // 返回token
 
     // 把token存入数据库
-    let tokenSql = `update user set token = '${token}', last_logintime = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
+    let tokenSql = `update user set token = '${token}', last_logintime = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
     await db(tokenSql);
 
     res.json({ success: true, msg: "注册成功", data: { access_token: token, expires } })
@@ -241,15 +241,15 @@ router.post('/register', async (req, res, next) => {
 //   if (users.length === 0) {
 //     // 插入数据
 //     // console.log(username)
-//     let insertSql = `insert into user set openid = '${openid}', token = '${token}', username = '${username}', headimg = '${headimg}', gender = '${gender}', country = '${country}', province = '${province}', city = '${city}', last_logintime = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}'`;
+//     let insertSql = `insert into user set openid = '${openid}', token = '${token}', username = '${username}', headimg = '${headimg}', gender = '${gender}', country = '${country}', province = '${province}', city = '${city}', last_logintime = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}'`;
 //     users = await db(insertSql);
 //   } else {
 //     // 更新token
-//     let updateSql = `update user set token = '${token}', last_logintime = '${dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where openid = '${openid}'`;
+//     let updateSql = `update user set token = '${token}', last_logintime = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where openid = '${openid}'`;
 //     users = await db(updateSql);
 //   }
 
-//   // console.log(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"));
+//   // console.log(dateformat(new Date(), "yyyy-mm-dd HH:MM:ss"));
 //   // 判断是否添加，更新成功
 //   if (users.affectedRows > 0) {
 //     res.json({ success: true, msg: "", data: { access_token: token, expires } });
