@@ -8,41 +8,39 @@ const dateformat = require('dateformat');
 
 const db = require('../modules/mysql');
 
-const { checkParams } = require('../modules/global'); // 公共方法
+const {
+  checkParams
+} = require('../modules/global'); // 公共方法
 
 // 检查用户名是否存在
 router.get('/check/username', async (req, res, next) => {
   let paramsArr = ['username'];
   if (!checkParams(paramsArr, req.query, res)) return;
 
-  let { username } = req.query;
+  let {
+    username
+  } = req.query;
 
   let sql = `select * from user where username = '${username}'`;
   let user = await db(sql);
 
   if (user.length > 0) {
-    res.json({ success: false, msg: "用户名已注册", data: null })
+    res.json({
+      success: false,
+      msg: "用户名已注册",
+      data: null
+    })
   } else {
-    res.json({ success: true, msg: "用户名可注册", data: null })
+    res.json({
+      success: true,
+      msg: "用户名可注册",
+      data: null
+    })
   }
 })
 
 /**
- * @api {post} /login 用户登录
- * @apiDescription 用户登录
- * @apiName login
- * @apiGroup user
- * @apiParam {string} username 用户名
- * @apiParam {string} password 密码
- * @apiSuccess {json} data
- * @apiSuccessExample {json} Success-Response:
- * {
- *    "success": true,
- *    "msg": "",
- *    "data": {}
- * }
- * @apiSampleRequest http://192.168.1.5:3000/login
- * @apiVersion 1.0.0
+ * 用户登录
  */
 router.post('/login', async (req, res, next) => {
   // console.log(req.headers);
@@ -51,22 +49,42 @@ router.post('/login', async (req, res, next) => {
   let paramsArr = ['username', 'password'];
   if (!checkParams(paramsArr, req.body, res)) return
 
-  let { username, password } = req.body; // username：用户名，password：密码
+  let {
+    username,
+    password
+  } = req.body; // username：用户名，password：密码
   password = md5(password + '_hot')
 
   let sql = `select * from user where username = '${username}' and password = '${password}'`;
   let user = await db(sql);
 
   if (user.length > 0) {
-    let { token, expires } = createToken({ username: user[0].username, password: user[0].password }); // 返回token
+    let {
+      token,
+      expires
+    } = createToken({
+      username: user[0].username,
+      password: user[0].password
+    }); // 返回token
 
     // 把token存入数据库
     let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
     await db(tokenSql);
 
-    res.json({ success: true, msg: "登录成功", data: { access_token: token, expires } })
+    res.json({
+      success: true,
+      msg: "登录成功",
+      data: {
+        access_token: token,
+        expires
+      }
+    })
   } else {
-    res.json({ success: false, msg: "账号或密码错误，请重新输入", data: null })
+    res.json({
+      success: false,
+      msg: "账号或密码错误，请重新输入",
+      data: null
+    })
   }
 });
 
@@ -93,14 +111,27 @@ router.post('/register', async (req, res, next) => {
   let paramsArr = ['username', 'password', 'password_confirm', 'email', 'qq', 'mobile', 'password_security', 'password_security_confirm'];
   if (!checkParams(paramsArr, req.body, res)) return
 
-  let { username, password, password_confirm, email, qq, mobile, password_security, password_security_confirm } = req.body;
+  let {
+    username,
+    password,
+    password_confirm,
+    email,
+    qq,
+    mobile,
+    password_security,
+    password_security_confirm
+  } = req.body;
   password = md5(password + '_hot')
 
   // 判断用户是否存在，存在则提示已存在，不存在则添加
   let userSql = `select * from user where username = '${username}'`;
   let userArr = await db(userSql);
   if (userArr.length > 0) {
-    res.json({ success: false, msg: "用户名已被注册", data: null })
+    res.json({
+      success: false,
+      msg: "用户名已被注册",
+      data: null
+    })
     return;
   }
 
@@ -111,15 +142,32 @@ router.post('/register', async (req, res, next) => {
 
   // 判断是否添加成功
   if (user.affectedRows > 0) {
-    let { token, expires } = createToken({ username, password }); // 返回token
+    let {
+      token,
+      expires
+    } = createToken({
+      username,
+      password
+    }); // 返回token
 
     // 把token存入数据库
     let tokenSql = `update user set token = '${token}', last_logintime = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
     await db(tokenSql);
 
-    res.json({ success: true, msg: "注册成功", data: { access_token: token, expires } })
+    res.json({
+      success: true,
+      msg: "注册成功",
+      data: {
+        access_token: token,
+        expires
+      }
+    })
   } else {
-    res.json({ success: false, msg: "注册失败，请检查", data: null })
+    res.json({
+      success: false,
+      msg: "注册失败，请检查",
+      data: null
+    })
   }
 });
 
@@ -260,7 +308,9 @@ router.post('/register', async (req, res, next) => {
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', {
+    title: 'Express'
+  });
 });
 
 module.exports = router;

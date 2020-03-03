@@ -6,7 +6,7 @@ const dateformat = require('dateformat');
 const db = require('../modules/mysql'); // mysql
 // const createToken = require("../token/createToken"); // 创建token
 const checkToken = require('../token/checkToken'); // 检查token
-const isCheck = true // 是否校验token
+const isCheck = false // 是否校验token
 
 // const { checkParams } = require('../modules/global'); // 公共方法
 
@@ -22,7 +22,7 @@ router.use(async (req, res, next) => {
   // console.log(req.route);
   let token = req.headers.authorization;
 
-  if(!isCheck) {
+  if (!isCheck) {
     next();
     return;
   }
@@ -42,11 +42,19 @@ router.use(async (req, res, next) => {
       if (data.length > 0) {
         next();
       } else {
-        res.json({ success: false, msg: "你的账号在另一个地方登录，请重新登录", data: null })
+        res.json({
+          success: false,
+          msg: "你的账号在另一个地方登录，请重新登录",
+          data: null
+        })
       }
     } catch (err) {
       // console.log('验证：', err)
-      res.json({ success: false, msg: '登录信息已过期，请重新登录', data: null })
+      res.json({
+        success: false,
+        msg: '登录信息已过期，请重新登录',
+        data: null
+      })
     }
   }
 });
@@ -54,7 +62,11 @@ router.use(async (req, res, next) => {
 /* GET home page. */
 router.get('/', function (req, res, next) {
   // res.render('index', { title: 'Express' });
-  res.json({ success: true, msg: '测试接口是否正常', data: null })
+  res.json({
+    success: true,
+    msg: '测试接口是否正常',
+    data: null
+  })
 });
 
 module.exports = router;

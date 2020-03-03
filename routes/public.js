@@ -8,7 +8,9 @@ const router = express.Router();
 // const validationResult = require('express-validator/check').validationResult;
 
 const db = require('../modules/mysql'); // mysql
-const { checkParams } = require('../modules/global'); // 公共方法
+const {
+  checkParams
+} = require('../modules/global'); // 公共方法
 
 // var iconv = require('iconv-lite');
 // var fs = require('fs');
@@ -38,7 +40,9 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}_${file.originalname}`);
   }
 });
-const upload = multer({ storage })
+const upload = multer({
+  storage
+})
 
 
 /**
@@ -52,16 +56,42 @@ router.get('/dict', async (req, res, next) => {
   let paramsArr = ['dict_code'];
   if (!checkParams(paramsArr, req.query, res)) return
 
-  const { dict_code } = req.query;
+  const {
+    dict_code
+  } = req.query;
 
-  const dictArr = ['wealth_dict', 'bank_dict', 'share_dict_toutiao', 'share_dict_douyin', 'share_dict_huoshan', 'share_dict_kuaishou']; // 所有字典表
+  // 所有字典表
+  const dictArr = [
+    'role_dict',
+    'real_reason_dict',
+    'platform_dict',
+    'complete_countdown_time_dict',
+    'attention_time_dict',
+    'bank_reason_dict',
+    'platform_reason_dict',
+    'platform_freeze_reason_dict',
+    'wealth_dict',
+    'bank_dict',
+    'share_dict_toutiao',
+    'share_dict_douyin',
+    'share_dict_huoshan',
+    'share_dict_kuaishou'
+  ];
 
   if (dictArr.includes(dict_code)) {
     let sql = `select * from ${dict_code}`;
     let data = await db(sql);
-    res.json({ success: true, msg: '', data })
+    res.json({
+      success: true,
+      msg: '',
+      data
+    })
   } else {
-    res.json({ success: true, msg: '', data: [] })
+    res.json({
+      success: true,
+      msg: '',
+      data: []
+    })
   }
 });
 
@@ -90,7 +120,7 @@ router.get('/area', async (req, res, next) => {
       // 添加区域
       item1.children = []
       areaData.forEach(item2 => {
-        if(item1.id === item2.pid) {
+        if (item1.id === item2.pid) {
           item1.children.push({
             areaId: item2.id,
             areaName: item2.name,
@@ -100,7 +130,7 @@ router.get('/area', async (req, res, next) => {
       })
 
       // 添加城市
-      if(item.id === item1.pid) {
+      if (item.id === item1.pid) {
         item.children.push({
           areaId: item1.id,
           areaName: item1.name,
@@ -110,7 +140,11 @@ router.get('/area', async (req, res, next) => {
     })
   })
 
-  res.json({ success: true, msg: '', data: provinceData })
+  res.json({
+    success: true,
+    msg: '',
+    data: provinceData
+  })
 
   // data = [
   //   {
@@ -134,7 +168,7 @@ router.get('/area', async (req, res, next) => {
   //   },
   //   ...
   // ]
-  
+
 });
 
 
@@ -150,7 +184,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   const host = `${req.protocol}://${req.headers.host}`;
   const file = `${host}/${imgSrc}/${req.file.filename}`
 
-  res.json({ success: true, msg: "", data: file })
+  res.json({
+    success: true,
+    msg: "",
+    data: file
+  })
 
   // let sql = `update users set headimg = '${file}'`;
   // let user = await db(sql)

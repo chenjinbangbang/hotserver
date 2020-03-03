@@ -26,6 +26,58 @@ const upload = multer({
 
 const db = require('../modules/mysql');
 
+/**
+ * 用户登录
+ * username 用户名
+ * password 密码
+ */
+router.post('/login', async (req, res, next) => {
+  // console.log(req.headers);
+
+  // 必传参数，检查字段是否存在或者是否为空
+  let paramsArr = ['username', 'password'];
+  if (!checkParams(paramsArr, req.body, res)) return
+
+  let {
+    username,
+    password
+  } = req.body;
+  password = md5(password + '_hot');
+
+  let sql = `select * from user where username = '${username}' and password = '${password}'`;
+  let user = await db(sql);
+  console.log(user)
+
+  if (user.length > 0) {
+    let {
+      token,
+      expires
+    } = createToken({
+      username: user[0].username,
+      password: user[0].password
+    }); // 返回token
+
+    // 把token存入数据库
+    let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
+    await db(tokenSql);
+
+    res.json({
+      success: true,
+      msg: "登录成功",
+      data: {
+        access_token: token,
+        expires
+      }
+    })
+  } else {
+    res.json({
+      success: false,
+      msg: "账号或密码错误，请重新输入",
+      data: null
+    })
+  }
+});
+
 
 /**
  * 用户注册
@@ -45,90 +97,125 @@ router.post('/register', async (req, res) => {
   let paramsArr = ['role', 'username', 'password', 'email', 'qq', 'mobile', 'password_security'];
   if (!checkParams(paramsArr, req.body, res)) return
 
-  let { role, referrer_user_id, username, password, email, qq, mobile, password_security } = req.body;
+  let {
+    role,
+    referrer_user_id,
+    username,
+    password,
+    email,
+    qq,
+    mobile,
+    password_security
+  } = req.body;
   password = md5(password + '_hot')
   password_security = md5(password_security + '_hot')
 
   // 验证用户名是否存在
-  // let usernameSql = `select * from user where username = '${username}'`;
-  // let usernameData = await db(usernameSql);
+  let usernameSql = `select * from user where username = '${username}'`;
+  let usernameData = await db(usernameSql);
 
-  // if(usernameData.length > 0) {
-  //   res.json({ success: false, msg: '此用户名已存在', data: null })
-  //   return
-  // }
+  if (usernameData.length > 0) {
+    res.json({
+      success: false,
+      msg: '此用户名已存在',
+      data: null
+    })
+    return
+  }
 
-  // // 验证邮箱是否存在
-  // let emailSql = `select * from user where email = '${email}'`;
-  // let emailData = await db(emailSql);
+  // 验证邮箱是否存在
+  let emailSql = `select * from user where email = '${email}'`;
+  let emailData = await db(emailSql);
 
-  // if(emailData.length > 0) {
-  //   res.json({ success: false, msg: '此邮箱已存在', data: null })
-  //   return
-  // }
+  if (emailData.length > 0) {
+    res.json({
+      success: false,
+      msg: '此邮箱已存在',
+      data: null
+    })
+    return
+  }
 
-  // // 验证QQ是否存在
-  // let qqSql = `select * from user where qq = '${qq}'`;
-  // let qqData = await db(qqSql);
+  // 验证QQ是否存在
+  let qqSql = `select * from user where qq = '${qq}'`;
+  let qqData = await db(qqSql);
 
-  // if(qqData.length > 0) {
-  //   res.json({ success: false, msg: '此QQ已存在', data: null })
-  //   return
-  // }
+  if (qqData.length > 0) {
+    res.json({
+      success: false,
+      msg: '此QQ已存在',
+      data: null
+    })
+    return
+  }
 
-  let sql = `insert into user set role = ${role}, referrer_user_id = ${referrer_user_id || 0}, username = '${username}', password = '${password}', email = '${email}', qq = '${qq}', mobile = '${mobile}', password_security = '${password_security}'`
+  let sql = `insert into user set role = ${role}, referrer_user_id = ${referrer_user_id || ''}, username = '${username}', password = '${password}', email = '${email}', qq = '${qq}', mobile = '${mobile}', password_security = '${password_security}'`
   let data = await db(sql);
   console.log(data)
 
-  if(data.affectedRows > 0) {
+  if (data.affectedRows > 0) {
 
     // 注册成功后，自动登录，并且更新token
-    let { token, expires } = createToken({ id: data.insertId, username, password }); // 返回token
-    console.log(token)
-    console.log(expires)
+    let {
+      token,
+      expires
+    } = createToken({
+      id: data.insertId,
+      username,
+      password
+    }); // 返回token
+    // console.log(token)
+    // console.log(expires)
 
     // 把token存入数据库
     let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where id = '${data.insertId}'`;
     await db(tokenSql);
 
-    res.json({ success: true, msg: "注册用户成功", data: { access_token: token, expires } })
-
-    // res.json({ success: true, msg: "注册用户成功", data: null })
+    res.json({
+      success: true,
+      msg: "注册用户成功",
+      data: {
+        access_token: token,
+        expires
+      }
+    })
   } else {
-    res.json({ success: false, msg: '注册用户失败', data: null })
+    res.json({
+      success: false,
+      msg: '注册用户失败',
+      data: null
+    })
   }
-
-  // if (user.length > 0) {
-  //   let { token, expires } = createToken({ username: user[0].username, password: user[0].password }); // 返回token
-
-  //   // 把token存入数据库
-  //   let tokenSql = `update user set token = '${token}', last_login_time = '${dateformat(new Date(), "yyyy-mm-dd HH:MM:ss")}' where username = '${username}'`;
-  //   await db(tokenSql);
-
-  //   res.json({ success: true, msg: "登录成功", data: { access_token: token, expires } })
-  // } else {
-  //   res.json({ success: false, msg: "账号或密码错误，请重新输入", data: null })
-  // }
 });
 
 
 /**
  * 验证用户名是否存在
  */
-router.get('/check/username', async (req,res) => {
+router.get('/check/username', async (req, res) => {
 
   let paramsArr = ['username'];
   if (!checkParams(paramsArr, req.query, res)) return
 
-  const { username } = req.query
+  const {
+    username
+  } = req.query
 
   let sql = `select * from user where username = '${username}'`;
   let data = await db(sql);
 
-  if(data.length > 0) {
-    res.json({ success: false, msg: '此用户名已存在', data: null })
+  if (data.length > 0) {
+    res.json({
+      success: false,
+      msg: '此用户名已存在',
+      data: null
+    })
   } else {
-    res.json({ success: true, msg: '此用户名可使用', data: null })
+    res.json({
+      success: true,
+      msg: '此用户名可使用',
+      data: null
+    })
   }
 });
 
@@ -136,20 +223,30 @@ router.get('/check/username', async (req,res) => {
 /**
  * 验证邮箱是否存在
  */
-router.get('/check/email', async (req,res) => {
+router.get('/check/email', async (req, res) => {
 
   let paramsArr = ['email'];
   if (!checkParams(paramsArr, req.query, res)) return
 
-  const { email } = req.query
+  const {
+    email
+  } = req.query
 
   let sql = `select * from user where email = '${email}'`;
   let data = await db(sql);
 
-  if(data.length > 0) {
-    res.json({ success: false, msg: '此邮箱已存在', data: null })
+  if (data.length > 0) {
+    res.json({
+      success: false,
+      msg: '此邮箱已存在',
+      data: null
+    })
   } else {
-    res.json({ success: true, msg: '此邮箱可使用', data: null })
+    res.json({
+      success: true,
+      msg: '此邮箱可使用',
+      data: null
+    })
   }
 });
 
@@ -157,20 +254,30 @@ router.get('/check/email', async (req,res) => {
 /**
  * 验证QQ是否存在
  */
-router.get('/check/qq', async (req,res) => {
+router.get('/check/qq', async (req, res) => {
 
   let paramsArr = ['qq'];
   if (!checkParams(paramsArr, req.query, res)) return
 
-  const { qq } = req.query
+  const {
+    qq
+  } = req.query
 
   let sql = `select * from user where qq = '${qq}'`;
   let data = await db(sql);
 
-  if(data.length > 0) {
-    res.json({ success: false, msg: '此QQ已存在', data: null })
+  if (data.length > 0) {
+    res.json({
+      success: false,
+      msg: '此QQ已存在',
+      data: null
+    })
   } else {
-    res.json({ success: true, msg: '此QQ可使用', data: null })
+    res.json({
+      success: true,
+      msg: '此QQ可使用',
+      data: null
+    })
   }
 });
 
@@ -180,6 +287,7 @@ router.get('/check/qq', async (req,res) => {
  * 获取用户列表
  * page 当前页
  * pageNum 一页的条数
+ * 
  */
 router.get('/list', async (req, res) => {
   // console.log(req.headers);
@@ -190,10 +298,33 @@ router.get('/list', async (req, res) => {
 
   let {
     page,
-    pageNum
+    pageNum,
+    role,
+    real_status
   } = req.query;
 
-  let sql = 'select * from user';
+  let sql = "select * from user";
+
+  // function searchCheck({ tableName: null, page: null, pageNum: null, flelds: {  } }) {
+  //   // let 
+
+  //   if (role !== undefined) {
+  //     sql += ` where role = ${role}`;
+  //   }
+  //   if (real_status !== undefined) {
+  //     if (sql.includes('where')) {
+  //       sql += ' and'
+  //     } else {
+  //       sql += ' where'
+  //     }
+  //     sql += ` real_status = ${real_status}`;
+  //   }
+  // }
+
+  // 搜索
+  // searchCheck(role, real_status)
+
+  console.log(sql)
 
   // 分页
   if (page || pageNum) {
@@ -201,12 +332,18 @@ router.get('/list', async (req, res) => {
     pageNum = Number(pageNum);
 
     // page校验
-    if(page < 1) {
-      res.json({ success: false, msg: 'page必须大于0', data: null })
+    if (page < 1) {
+      res.json({
+        success: false,
+        msg: 'page必须大于0',
+        data: null
+      })
       return
     }
     sql += ` limit ${(page - 1) * pageNum},${pageNum}`;
   }
+
+
 
   // 获取用户总数
   let userTotalSql = 'select count(id) count from user';

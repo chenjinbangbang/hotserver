@@ -3,19 +3,30 @@ module.exports = {
   checkParams(paramsArr, params, res) {
     // console.log(paramsArr); // ['js_code']
     // console.log(params);
-  
+
     let paramsKeys = Object.keys(params); // ['code']
-    for(let item of paramsArr){
-      if(paramsKeys.includes(item)){
-        if(!params[item]){
-          res.json({ success: false, msg: `${item}不能为空`, data: null });
+    for (let item of paramsArr) {
+      if (paramsKeys.includes(item)) {
+        if (!params[item]) {
+          res.json({
+            success: false,
+            msg: `${item}不能为空`,
+            data: null
+          });
           return false;
         }
       } else {
-        res.json({ success: false, msg: `${item}不存在`, data: null });
-          return false;
+        res.json({
+          success: false,
+          msg: `${item}不存在`,
+          data: null
+        });
+        return false;
       }
     }
     return true;
-  }
+  },
+
+  // 封装搜索
+  // searchCheck()
 }
