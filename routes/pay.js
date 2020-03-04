@@ -1,5 +1,5 @@
 /**
- * 公共接口
+ * 接口
  */
 const express = require('express');
 const router = express.Router();
@@ -8,7 +8,9 @@ const router = express.Router();
 // const validationResult = require('express-validator/check').validationResult;
 
 const db = require('../modules/mysql'); // mysql
-const { checkParams } = require('../modules/global'); // 公共方法
+const {
+  checkParams
+} = require('../modules/global'); // 公共方法
 
 
 /**
@@ -20,7 +22,11 @@ router.get('/list', async (req, res, next) => {
   let sql = `select * from pay`;
   let data = await db(sql);
   // console.log(data)
-  res.json({ success: true, msg: '', data })
+  res.json({
+    success: true,
+    msg: '',
+    data
+  })
 });
 
 
@@ -40,18 +46,31 @@ router.post('/wealth', async (req, res, next) => {
   let paramsArr = ['account', 'deal_num', 'pay_type', 'wealth'];
   if (!checkParams(paramsArr, req.body, res)) return
 
-  const { account, deal_num, pay_type, wealth } = req.body
+  const {
+    account,
+    deal_num,
+    pay_type,
+    wealth
+  } = req.body
 
   let sql = `insert into pay set user_id = '${user_id}', account = '${account}', deal_num = '${deal_num}', pay_type = ${pay_type}, wealth = ${wealth}`;
   let data = await db(sql);
   // console.log(data)
 
   if (data.affectedRows > 0) {
-    res.json({ success: true, msg: '已充值，待到账', data: null })
+    res.json({
+      success: true,
+      msg: '已充值，待到账',
+      data: null
+    })
   } else {
-    res.json({ success: false, msg: '充值失败', data: null })
+    res.json({
+      success: false,
+      msg: '充值失败',
+      data: null
+    })
   }
-  
+
 });
 
 
@@ -67,8 +86,11 @@ router.post('/status', async (req, res, next) => {
 
   let paramsArr = ['id', 'status'];
   if (!checkParams(paramsArr, req.body, res)) return
-  
-  const { id, status } = req.body
+
+  const {
+    id,
+    status
+  } = req.body
 
   let statusArr = {
     0: '已充值，待到账',
@@ -78,8 +100,12 @@ router.post('/status', async (req, res, next) => {
 
   // status校验
   let keys = Object.keys(statusArr); // 索引是string类型
-  if(!keys.includes(status)){
-    res.json({ success: false, msg: 'status传参有误', data: null })
+  if (!keys.includes(status)) {
+    res.json({
+      success: false,
+      msg: 'status传参有误',
+      data: null
+    })
     return
   }
 
@@ -88,9 +114,17 @@ router.post('/status', async (req, res, next) => {
   // console.log(data)
 
   if (data.affectedRows > 0) {
-    res.json({ success: true, msg: statusArr[status], data: null })
+    res.json({
+      success: true,
+      msg: statusArr[status],
+      data: null
+    })
   } else {
-    res.json({ success: false, msg: '更改充值状态失败', data: null })
+    res.json({
+      success: false,
+      msg: '更改充值状态失败',
+      data: null
+    })
   }
 });
 

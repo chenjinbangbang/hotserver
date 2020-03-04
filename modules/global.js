@@ -25,8 +25,5 @@ module.exports = {
       }
     }
     return true;
-  },
-
-  // 封装搜索
-  // searchCheck()
+  }
 }
