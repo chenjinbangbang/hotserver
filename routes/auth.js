@@ -11,6 +11,8 @@ const {
   checkParams
 } = require('../modules/global'); // 公共方法
 
+const db = require('../modules/mysql');
+
 /**
  * 用户登录
  * username 用户名

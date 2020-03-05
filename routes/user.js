@@ -102,7 +102,7 @@ router.post('/list', async (req, res) => {
   };
 
   for (let key in searchObj) {
-    console.log(key, searchObj[key])
+    // console.log(key, searchObj[key])
     if (searchObj[key] !== undefined && searchObj[key] !== '') {
       if (sql.includes('where')) {
         sql += ` and`;
@@ -178,11 +178,11 @@ router.post('/identity/status', async (req, res) => {
   let paramsArr = ['id', 'real_status'];
   if (!checkParams(paramsArr, req.body, res)) return;
 
-  let {
-    id,
-    real_status,
-    real_reason
-  }
+  // let {
+  //   id,
+  //   real_status,
+  //   real_reason
+  // }
 
   let sql = `update user set real_status = '${real_status}' where id = ${id}`;
 
