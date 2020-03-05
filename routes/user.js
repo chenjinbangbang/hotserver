@@ -62,11 +62,8 @@ router.get('/referrer_username', async (req, res) => {
  */
 router.post('/list', async (req, res) => {
   // console.log(req.headers);
-  // console.log(req.query);
-  // console.log(req.query.create_time);
-  console.log(req.body);
+  // console.log(req.body);
   // console.log(req.body.create_time);
-  // res.json(req.body)
   // return;
 
   // 必传参数，检查字段是否存在或者是否为空
@@ -88,8 +85,8 @@ router.post('/list', async (req, res) => {
     last_login_time
   } = req.body;
 
-  // 使用内连接/等值连接，查询referrer_user_id对应的id的username(referrer_username)师傅
-  let sql = `select a.*, b.username referrer_username from user a inner join user b on a.referrer_user_id = b.id`;
+  // 使用左连接，查询referrer_user_id对应的id的username(referrer_username)师傅
+  let sql = `select a.*, b.username referrer_username, (select count(*) from user where a.id = referrer_user_id) referrer_num from user a left join user b on a.referrer_user_id = b.id`;
 
   // 模糊搜索：编号(id)，用户名(username)，E-mail(email)，QQ(qq)，手机号(mobile)，冻结原因(freeze_reason)，真实姓名(name)，身份证号码(idcardno)（一定要为''空字符串，不能为undefined，否则报错）
   sql += ` where (a.id like '%${searchVal}%' or a.username like '%${searchVal}%' or a.email like '%${searchVal}%' or a.qq like '%${searchVal}%' or a.mobile like '%${searchVal}%' or a.freeze_reason like '%${searchVal}%' or a.name like '%${searchVal}%' or a.idcardno like '%${searchVal}%')`;
@@ -118,7 +115,6 @@ router.post('/list', async (req, res) => {
   console.log(sql);
 
   // 查询注册时间
-  // console.log(create_time, last_login_time)
   if (create_time) {
     sql += ` and a.create_time between '${create_time[0]}' and '${create_time[1]}'`;
   }
@@ -170,23 +166,31 @@ router.post('/list', async (req, res) => {
   })
 });
 
+
 /**
- * @api {get} /users/userinfo 查询用户信息
- * @apiDescription 查询用户信息
- * @apiName userinfo
- * @apiGroup user
- * @apiHeader {string} authorization 用户token
- * @apiSuccess {boolean} success 成功：true，失败：false
- * @apiSuccess {string} msg 提示信息
- * @apiSuccess {json} data 返回结果
- * @apiSuccessExample {json} Success-Response:
- * {
- *    "success": true,
- *    "msg": "",
- *    "data": {}
- * }
- * @apiSampleRequest http://192.168.1.5:3000/users/userinfo
- * @apiVersion 1.0.0
+ * 实名认证审核
+ * id 用户编号
+ * real_status 实名状态/审核状态 （必填，0 未实名，1 待审核，2 审核不通过，3 已实名）
+ * real_reason 实名审核不通过原因（非必填，real_status为2时必填）
+ */
+router.post('/identity/status', async (req, res) => {
+  // 必传参数，检查字段是否存在或者是否为空
+  let paramsArr = ['id', 'real_status'];
+  if (!checkParams(paramsArr, req.body, res)) return;
+
+  let {
+    id,
+    real_status,
+    real_reason
+  }
+
+  let sql = `update user set real_status = '${real_status}' where id = ${id}`;
+
+});
+
+
+/**
+ * 查询用户信息
  */
 router.get('/userinfo', async (req, res) => {
   const token = req.headers.authorization;
@@ -210,23 +214,10 @@ router.get('/userinfo', async (req, res) => {
   }
 });
 
+
+
 /**
- * @api {post} /users/update/headimg 修改用户图片
- * @apiDescription 修改用户图片
- * @apiName updateheadimg
- * @apiGroup user
- * @apiHeader {string} authorization 用户token
- * @apiSuccess {boolean} success 成功：true，失败：false
- * @apiSuccess {string} msg 提示信息
- * @apiSuccess {json} data 返回结果
- * @apiSuccessExample {json} Success-Response:
- * {
- *    "success": true,
- *    "msg": "",
- *    "data": {}
- * }
- * @apiSampleRequest http://192.168.1.5:3000/users/update/headimg
- * @apiVersion 1.0.0
+ * 修改用户图片
  */
 router.post('/update/headimg', upload.single('headimg'), async (req, res) => {
   const token = req.headers.authorization;
