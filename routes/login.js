@@ -3,6 +3,11 @@ const router = express.Router();
 const md5 = require('js-md5');
 const dateformat = require('dateformat');
 
+// 验证数据
+const expressValidator = require('express-validator');
+const check = require('express-validator/check').check;
+const validationResult = require('express-validator/check').validationResult;
+
 // const request = require('request'); // 处理node request请求
 // const wx = require('../utils/wxconfig.json'); // 微信小程序设置，appid和secret
 
